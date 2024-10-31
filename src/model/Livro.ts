@@ -1,4 +1,7 @@
+import { DataBaseModel } from "./DataBaseModel";
 
+// armazenei o pool de conexões
+const database = new DataBaseModel().pool;
 
 export class Livro {
     private idLivro: number = 0 ;
@@ -209,6 +212,85 @@ public getISBN(): string{
     public setStatusLivroEmprestado(_statusLivroEmprestado: string): void{
         this.statusLivroEmprestado = _statusLivroEmprestado;
     }
+
+    static async listagemLivro(): Promise<Array<Livro> | null> {
+        // objeto para armazenar a lista de carros
+        const listaDeLivros: Array<Livro> = [];
+
+        try {
+            // query de consulta ao banco de dados
+            const querySelectLivro = `SELECT * FROM livro;`;
+
+            // fazendo a consulta e guardando a resposta
+            const respostaBD = await database.query(querySelectLivro);
+
+            // usando a resposta para instanciar um objeto do tipo carro
+            respostaBD.rows.forEach((linha) => {
+                // instancia (cria) objeto carro
+                const novoLivro = new Livro (
+                    linha.titulo,
+                    linha.autor,
+                    linha.editora,
+                    linha.anoPublicacao,
+                    linha.isb,
+                    linha.quantTotal,
+                    linha.quantDisponivel,
+                    linha.valorAquisicao,
+                    linha.statusLivroEmprestado
+     );
+
+                // atribui o ID objeto
+                novoLivro.setIdLivro(linha.id_livro);
+
+                // adiciona o objeto na lista
+                listaDeLivros.push(novoLivro);
+            });
+
+            // retorna a lista de livros
+            return listaDeLivros;
+        } catch (error) {
+            console.log('Erro ao buscar lista de livros');
+            return null;
+        }
+    }
+    static async cadastroLivro(livro: Livro): Promise<boolean> {
+        try {
+            // query para fazer insert de um livro no banco de dados
+            const queryInsertLivro = `INSERT INTO livro (autor, editora, anopublicacao, ISBN, quantTotal, quantDisponivel, valorAquisicao, statusLivroEmprestado)
+                                        VALUES
+                                        ('${livro.getAutor()}', 
+                                        '${livro.getEditora()}', 
+                                        '${livro.getAnoPublicacao()}',
+                                        '${livro.getISBN()}',
+                                        '${livro.getQuantTotal()}',
+                                        '${livro.getQuantDisponivel()}',
+                                        '${livro.getValorAquisicao()}',
+                                        '${livro.getStatusLivroEmprestado()})
+                                        RETURNING id_livro;`;
+
+            // executa a query no banco e armazena a resposta
+            const respostaBD = await database.query(queryInsertLivro);
+
+            // verifica se a quantidade de linhas modificadas é diferente de 0
+            if (respostaBD.rowCount != 0) {
+                console.log(`Carro cadastrado com sucesso! ID do livro: ${respostaBD.rows[0].id_livro}`);
+                // true significa que o cadastro foi feito
+                return true;
+            }
+            // false significa que o cadastro NÃO foi feito.
+            return false;
+
+            // tratando o erro
+        } catch (error) {
+            // imprime outra mensagem junto com o erro
+            console.log('Erro ao cadastrar o livro. Verifique os logs para mais detalhes.');
+            // imprime o erro no console
+            console.log(error);
+            // retorno um valor falso
+            return false;
+        }
+    }
 }
+
 
 

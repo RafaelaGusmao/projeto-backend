@@ -1,3 +1,7 @@
+import { DataBaseModel } from "./DataBaseModel";
+
+// armazenei o pool de conexões
+const database = new DataBaseModel().pool;
 
 export class Emprestimo{
 
@@ -119,6 +123,33 @@ export class Emprestimo{
      */
     public getStatusEmprestimo(): string {
         return this.statusEmprestimo;
+    }
+    static async listagemEmprestimo(): Promise<Array<Emprestimo> | null> {
+        const listaDeEmprestimo: Array<Emprestimo> = [];
+
+        try {
+            const querySelectEmprestimo = `SELECT * FROM emprestimo;`;
+            const respostaBD = await database.query(querySelectEmprestimo);
+
+            respostaBD.rows.forEach((linha) => {
+                const novoEmprestimo = new Emprestimo(
+                    linha.idAluno,
+                    linha.idLivro ,
+                    linha.ataEmprestimo,
+                    linha.dataDevolucao,
+                    linha.statusEmprestimo
+                );
+
+                novoEmprestimo.setIdEmprestimo(linha.emprestimo);
+
+                listaDeEmprestimo.push(novoEmprestimo);
+            });
+
+            return listaDeEmprestimo;
+        } catch (error) {
+            console.log('Erro ao buscar lista de emprestimos');
+            return null;
+        }
     }
 }
 
