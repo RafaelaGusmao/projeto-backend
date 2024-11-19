@@ -33,3 +33,4 @@ router.get("/lista/emprestimo", EmprestimoController.todos);
 
 // exportando as rotas
 export { router };
+

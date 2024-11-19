@@ -231,12 +231,12 @@ public getISBN(): string{
                     linha.titulo,
                     linha.autor,
                     linha.editora,
-                    linha.anoPublicacao,
-                    linha.isb,
-                    linha.quantTotal,
-                    linha.quantDisponivel,
-                    linha.valorAquisicao,
-                    linha.statusLivroEmprestado
+                    linha.ano_publicacao,
+                    linha.isbn,
+                    linha.quant_total,
+                    linha.quant_disponivel,
+                    linha.valor_aquisicao,
+                    linha.status_livro_emprestado
      );
 
                 // atribui o ID objeto
@@ -256,16 +256,17 @@ public getISBN(): string{
     static async cadastroLivro(livro: Livro): Promise<boolean> {
         try {
             // query para fazer insert de um livro no banco de dados
-            const queryInsertLivro = `INSERT INTO livro (autor, editora, anopublicacao, ISBN, quantTotal, quantDisponivel, valorAquisicao, statusLivroEmprestado)
+            const queryInsertLivro = `INSERT INTO livro (titulo, autor, editora, ano_publicacao, ISBN, quant_total, quant_disponivel, valor_aquisicao, status_livro_emprestado)
                                         VALUES
-                                        ('${livro.getAutor()}', 
+                                        ('${livro.getTitulo()}',
+                                        '${livro.getAutor()}', 
                                         '${livro.getEditora()}', 
                                         '${livro.getAnoPublicacao()}',
                                         '${livro.getISBN()}',
-                                        '${livro.getQuantTotal()}',
-                                        '${livro.getQuantDisponivel()}',
-                                        '${livro.getValorAquisicao()}',
-                                        '${livro.getStatusLivroEmprestado()})
+                                        ${livro.getQuantTotal()},
+                                        ${livro.getQuantDisponivel()},
+                                        ${livro.getValorAquisicao()},
+                                        '${livro.getStatusLivroEmprestado()}')
                                         RETURNING id_livro;`;
 
             // executa a query no banco e armazena a resposta
